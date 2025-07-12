@@ -1,10 +1,21 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 
 const useChat = () => {
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef(null);
+
+  // Auto scroll para a última mensagem
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'end'
+      });
+    }
+  }, [messages, isTyping]);
 
   const generateBotResponse = useCallback((userText) => {
     const lowerText = userText.toLowerCase();
@@ -24,7 +35,7 @@ const useChat = () => {
           },
           {
             url: "https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=300",
-            alt: "Design Template",
+            alt: "Design Template", 
             onTryNow: () => alert("Trying Design Template...")
           },
           {
@@ -54,7 +65,7 @@ const useChat = () => {
             onClick: () => sendMessage("Generate visuals")
           },
           {
-            text: "Create content",
+            text: "Create content", 
             onClick: () => alert("Creating content...")
           },
           {
@@ -86,7 +97,7 @@ const useChat = () => {
             onClick: () => sendMessage("Generate visuals")
           },
           {
-            text: "Code assistance",
+            text: "Code assistance", 
             onClick: () => alert("Providing code assistance...")
           }
         ]
@@ -163,7 +174,8 @@ const useChat = () => {
     setInputValue,
     sendMessage,
     isLoading,
-    clearChat
+    clearChat,
+    messagesEndRef
   };
 };
 
