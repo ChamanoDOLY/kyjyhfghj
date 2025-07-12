@@ -1,10 +1,13 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 
 const useChat = () => {
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Add useRef to store the latest sendMessage function
+  const latestSendMessageRef = useRef();
 
   const generateBotResponse = useCallback((userText) => {
     const lowerText = userText.toLowerCase();
@@ -51,7 +54,7 @@ const useChat = () => {
         buttons: [
           {
             text: "Generate visuals",
-            onClick: () => sendMessage("Generate visuals")
+            onClick: () => latestSendMessageRef.current("Generate visuals")
           },
           {
             text: "Create content",
@@ -83,7 +86,7 @@ const useChat = () => {
           },
           {
             text: "Image creation",
-            onClick: () => sendMessage("Generate visuals")
+            onClick: () => latestSendMessageRef.current("Generate visuals")
           },
           {
             text: "Code assistance",
@@ -111,7 +114,7 @@ const useChat = () => {
       isUser: false,
       timestamp: new Date()
     };
-  }, []);
+  }, []); // Empty dependency array since it doesn't depend on any state
 
   const sendMessage = useCallback(async (text) => {
     if (!text.trim() || isLoading) return;
@@ -136,18 +139,15 @@ const useChat = () => {
       
       const botResponse = generateBotResponse(text);
       
-      // Adicionar referência ao sendMessage nos botões
-      if (botResponse.buttons) {
-        botResponse.buttons = botResponse.buttons.map(button => ({
-          ...button,
-          onClick: button.onClick || (() => sendMessage(button.text))
-        }));
-      }
-      
       setMessages(prev => [...prev, botResponse]);
       setIsLoading(false);
     }, delay);
   }, [isLoading, generateBotResponse]);
+
+  // Update the ref whenever sendMessage changes
+  useEffect(() => {
+    latestSendMessageRef.current = sendMessage;
+  }, [sendMessage]);
 
   const clearChat = useCallback(() => {
     setMessages([]);
