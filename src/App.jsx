@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import './App.css';
 
 // Importar componentes
@@ -15,9 +15,21 @@ function App() {
     inputValue, 
     setInputValue, 
     sendMessage, 
-    isLoading,
-    messagesEndRef
+    isLoading 
   } = useChat();
+  
+  const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
+
+  // Auto scroll para a última mensagem
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'end'
+      });
+    }
+  }, [messages, isTyping]);
 
   // Handler para sugestões do estado vazio
   const handleSuggestionClick = (suggestion) => {
@@ -30,16 +42,20 @@ function App() {
   };
 
   return (
-    <div className="chat-container">
+    <div className="flex flex-col h-screen bg-gray-50">
       {/* Header */}
       <ChatHeader />
 
       {/* Messages Area */}
-      <div className="messages-container">
+      <div 
+        ref={messagesContainerRef}
+        className="flex-1 overflow-y-auto px-6 py-4"
+        style={{ scrollBehavior: 'smooth' }}
+      >
         {messages.length === 0 ? (
           <EmptyState onSuggestionClick={handleSuggestionClick} />
         ) : (
-          <div className="messages-list">
+          <div className="space-y-0">
             {messages.map((message) => (
               <ChatMessage
                 key={message.id}
@@ -48,7 +64,7 @@ function App() {
               />
             ))}
             {isTyping && <ChatMessage isTyping={true} />}
-            <div ref={messagesEndRef} />
+            <div ref={messagesEndRef} className="h-1" />
           </div>
         )}
       </div>
